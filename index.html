@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TextSim Conversation Recorder</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">💬</div>
+      <h1>TextSim</h1>
+      <p>Conversation Recorder</p>
+    </header>
+
+    <main class="layout">
+      <aside class="left-column">
+        <section class="card">
+          <h2>Setup</h2>
+          <p class="muted">Upload your conversation script and mascot image to get started.</p>
+
+          <div class="field-block">
+            <label for="conversationFile">Conversation File</label>
+            <input id="conversationFile" type="file" accept=".txt,text/plain" />
+            <div id="conversationFileChip" class="upload-chip empty">No file uploaded</div>
+          </div>
+
+          <div class="field-block">
+            <label for="mascotImage">Mascot Image</label>
+            <input id="mascotImage" type="file" accept="image/*" />
+            <div id="mascotChip" class="upload-chip empty">No mascot uploaded</div>
+          </div>
+
+          <div class="field-block">
+            <label for="senderName">Sender Name</label>
+            <input id="senderName" type="text" placeholder="Campus Bot" />
+          </div>
+
+          <p id="setupStatus" class="success-box">Add a script and mascot image to continue.</p>
+        </section>
+
+        <section class="card">
+          <h2>Playback</h2>
+          <p class="muted">Preview the conversation and record it as a video.</p>
+
+          <label for="speedSlider" class="speed-label">Message Speed: <span id="speedValue">3.0s</span></label>
+          <input id="speedSlider" type="range" min="1" max="6" step="0.5" value="3" />
+          <div class="speed-range-labels">
+            <span>Fast</span>
+            <span>Slow</span>
+          </div>
+
+          <p id="messageProgress" class="progress-label">Message 0 of 0</p>
+
+          <div class="actions-row">
+            <button id="resetBtn" type="button" class="btn btn-light">Reset</button>
+            <button id="playBtn" type="button" class="btn btn-accent">Play</button>
+          </div>
+
+          <button id="recordBtn" type="button" class="btn btn-accent btn-full">Record & Download</button>
+          <p id="recordStatus" class="status-line">Ready.</p>
+        </section>
+      </aside>
+
+      <section class="preview-area">
+        <div class="phone-frame">
+          <canvas id="previewCanvas" width="540" height="960"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

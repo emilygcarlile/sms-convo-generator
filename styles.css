@@ -1,0 +1,243 @@
+:root {
+  --bg: #f2f4f7;
+  --card: #ffffff;
+  --line: #e4e7ee;
+  --ink: #111827;
+  --muted: #5d6679;
+  --accent: #2ca79d;
+  --chip-bg: #effbfa;
+  --chip-line: #90dbd3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.topbar {
+  height: 74px;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0 1.3rem;
+  border-bottom: 1px solid #dde1e9;
+  background: #fff;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 2.05rem;
+  line-height: 1;
+}
+
+.topbar p {
+  margin: 0.1rem 0 0;
+  color: #6b7280;
+  font-size: 1.85rem;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 1.4rem;
+  padding: 1rem;
+  min-height: calc(100vh - 74px);
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 1.2rem;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04);
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 2.6rem;
+}
+
+.muted {
+  color: var(--muted);
+  margin: 0.5rem 0 1rem;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.field-block {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-weight: 650;
+  font-size: 1rem;
+}
+
+input[type="file"],
+input[type="text"] {
+  width: 100%;
+  font: inherit;
+}
+
+input[type="text"] {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.65rem 0.9rem;
+  font-size: 1rem;
+}
+
+.upload-chip {
+  margin-top: 0.5rem;
+  border-radius: 14px;
+  padding: 0.8rem 0.9rem;
+  border: 2px dashed var(--chip-line);
+  background: var(--chip-bg);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.upload-chip.empty {
+  color: #7a8599;
+  border-color: #d2dde9;
+  background: #f7fafc;
+}
+
+.upload-chip img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.success-box {
+  margin: 0;
+  background: #e8f6f4;
+  color: #0d665f;
+  border-radius: 14px;
+  padding: 0.8rem 0.9rem;
+  font-size: 1.05rem;
+}
+
+.speed-label {
+  margin-bottom: 0.3rem;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.speed-range-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #6c7588;
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.progress-label {
+  font-size: 1.05rem;
+  color: #5f6980;
+}
+
+.actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 0.65rem 1rem;
+  font-size: 1.05rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-light {
+  background: #ffffff;
+  border-color: #cfd6e3;
+  color: #1f2937;
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.status-line {
+  min-height: 1.1rem;
+  margin: 0.7rem 0 0;
+  color: #1d4ed8;
+  font-size: 0.95rem;
+}
+
+.preview-area {
+  display: grid;
+  place-items: center;
+}
+
+.phone-frame {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+#previewCanvas {
+  width: min(62vh, 430px);
+  height: auto;
+  border-radius: 42px;
+  display: block;
+  background: #fff;
+}
+
+@media (max-width: 1020px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-area {
+    padding-bottom: 1rem;
+  }
+
+  #previewCanvas {
+    width: min(86vw, 420px);
+  }
+}
