@@ -24,6 +24,7 @@ const recordBtn = document.getElementById("recordBtn");
 
 let chatbotAvatar = null;
 let messages = [];
+let rawScriptText = "";
 let playbackClock = 0;
 let playbackState = "idle";
 let playbackRaf = null;
@@ -71,23 +72,33 @@ function getSpeedMultiplier() {
   return 3 / getSecondsPerMessage();
 }
 
-function normalizeMessageText(text) {
-  return text
-    .replace(/\r/g, "")
-    .replace(/\s*(\[\d+\])\s*/g, "\n$1 ")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+function normalizeMessageText(text, options = {}) {
+  const preserveSpacing = Boolean(options.preserveSpacing);
+  let normalized = text.replace(/\r/g, "").replace(/[ \t]+\n/g, "\n");
+
+  // Put numbered options on their own lines, but do not flatten existing paragraph breaks.
+  normalized = normalized.replace(/[ \t]*(\[\d+\])[ \t]*/g, "$1 ");
+  normalized = normalized.replace(/([^\n])(\[\d+\]\s)/g, "$1\n$2");
+
+  if (preserveSpacing) {
+    // Preserve source spacing; only prevent extreme runs from blowing up bubble height.
+    normalized = normalized.replace(/\n{4,}/g, "\n\n\n");
+  } else {
+    // Compact mode for tighter bubbles.
+    normalized = normalized.replace(/\n{3,}/g, "\n\n").replace(/\n/g, " ");
+    normalized = normalized.replace(/\s{2,}/g, " ");
+    // Keep numbered choices readable in compact mode.
+    normalized = normalized.replace(/([^\n])(\[\d+\]\s)/g, "$1\n$2");
+  }
+
+  return normalized.trim();
 }
 
-function parseScript(rawText) {
-  const lines = rawText
-    .replace(/^\uFEFF/, "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+function parseScript(rawText, options = {}) {
+  const preserveSpacing = Boolean(options.preserveSpacing);
+  const lines = rawText.replace(/^\uFEFF/, "").replace(/\r/g, "").split("\n");
 
-  if (lines.length === 0) {
+  if (!lines.some((line) => line.trim().length > 0)) {
     throw new Error("Conversation file is empty.");
   }
 
@@ -98,14 +109,24 @@ function parseScript(rawText) {
   const isBotLabel = (label) =>
     ["bot", "chatbot", "mascot", "assistant", "school", "sender"].includes(label) || label === senderKey;
 
+  let pendingBlankLines = 0;
   lines.forEach((line, idx) => {
-    const parsed = line.match(/^([^:]+)\s*:\s*(.+)$/);
+    const trimmed = line.trim();
+    if (trimmed.length === 0) {
+      pendingBlankLines += 1;
+      return;
+    }
+
+    const parsed = trimmed.match(/^([^:]+)\s*:\s*(.+)$/);
     if (!parsed) {
       if (parsedMessages.length === 0) {
         throw new Error(`Line ${idx + 1} is invalid. Use \"student:\" or \"bot:\".`);
       }
+      const spacer =
+        preserveSpacing && pendingBlankLines > 0 ? "\n".repeat(Math.min(2, pendingBlankLines + 1)) : "\n";
       // Allow multiline content that continues the previous speaker.
-      parsedMessages[parsedMessages.length - 1].text += `\n${line}`;
+      parsedMessages[parsedMessages.length - 1].text += `${spacer}${trimmed}`;
+      pendingBlankLines = 0;
       return;
     }
 
@@ -121,8 +142,11 @@ function parseScript(rawText) {
           `Line ${idx + 1} has unsupported speaker \"${parsed[1].trim()}\". Use student or bot labels.`,
         );
       }
+      const spacer =
+        preserveSpacing && pendingBlankLines > 0 ? "\n".repeat(Math.min(2, pendingBlankLines + 1)) : "\n";
       // If the label is unknown (e.g. URL like http:), treat as message continuation.
-      parsedMessages[parsedMessages.length - 1].text += `\n${line}`;
+      parsedMessages[parsedMessages.length - 1].text += `${spacer}${trimmed}`;
+      pendingBlankLines = 0;
       return;
     }
 
@@ -130,10 +154,11 @@ function parseScript(rawText) {
       role,
       text: parsed[2].trim(),
     });
+    pendingBlankLines = 0;
   });
 
   parsedMessages.forEach((message) => {
-    message.text = normalizeMessageText(message.text);
+    message.text = normalizeMessageText(message.text, { preserveSpacing });
   });
 
   return parsedMessages;
@@ -630,6 +655,19 @@ function updateSetupReadiness() {
   }
 }
 
+function rebuildMessagesFromRaw() {
+  if (!rawScriptText) return true;
+  try {
+    messages = parseScript(rawScriptText, { preserveSpacing: true });
+    return true;
+  } catch (error) {
+    messages = [];
+    messageProgressEl.textContent = "Message 0 of 0";
+    setRecordStatus(error.message, true);
+    return false;
+  }
+}
+
 async function pickCodec(width, height) {
   const codecs = ["avc1.4d002a", "avc1.42E01E", "avc1.42001f"];
   for (const codec of codecs) {
@@ -721,7 +759,8 @@ conversationFileInput.addEventListener("change", async (event) => {
 
   try {
     const text = await readTextFile(file);
-    messages = parseScript(text);
+    rawScriptText = text;
+    if (!rebuildMessagesFromRaw()) return;
     conversationFileChip.classList.remove("empty");
     conversationFileChip.textContent = `📄 ${file.name}`;
     resetPlayback();
@@ -729,6 +768,7 @@ conversationFileInput.addEventListener("change", async (event) => {
     setRecordStatus(`Loaded ${messages.length} messages.`);
   } catch (error) {
     messages = [];
+    rawScriptText = "";
     conversationFileChip.classList.add("empty");
     conversationFileChip.textContent = "No file uploaded";
     messageProgressEl.textContent = "Message 0 of 0";
@@ -757,6 +797,9 @@ mascotImageInput.addEventListener("change", async (event) => {
 });
 
 senderNameInput.addEventListener("input", () => {
+  if (rawScriptText) {
+    rebuildMessagesFromRaw();
+  }
   renderCurrentFrame();
 });
 
