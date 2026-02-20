@@ -57,3 +57,23 @@ student: When does spring registration open?
 - If changes are not showing: hard refresh with `Cmd+Shift+R` (Mac) or `Ctrl+F5` (Windows).
 - If app page does not open: confirm Terminal is still running `python3 -m http.server 8080`.
 - If export fails: use Chrome/Edge and try a shorter script to test.
+
+## Automatic deploy to Netlify
+
+This project now includes a GitHub Action workflow at `.github/workflows/netlify-deploy.yml`.
+
+How it works:
+- Every push to the `main` branch triggers a deploy to Netlify.
+- The deploy publishes this folder (`.`), which is correct for this static app.
+
+One-time setup in GitHub (required):
+1. Open this repository in GitHub.
+2. Go to **Settings > Secrets and variables > Actions**.
+3. Add these two repository secrets:
+   - `NETLIFY_AUTH_TOKEN` (from Netlify user settings)
+   - `NETLIFY_SITE_ID` (from your Netlify site settings)
+
+After that, your update flow is:
+1. Make code changes.
+2. Commit and push to `main`.
+3. GitHub Action deploys automatically to Netlify.
